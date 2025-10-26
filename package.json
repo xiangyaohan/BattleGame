@@ -6,9 +6,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "echo 'No build step required for static files'",
+    "build": "echo 'Static files ready for deployment'",
     "test": "echo 'No tests specified'",
-    "deploy": "npm run build && npm start"
+    "deploy": "vercel --prod",
+    "deploy-preview": "vercel"
   },
   "keywords": [
     "board-game",
@@ -33,7 +34,9 @@
   },
   "homepage": "https://github.com/your-username/siege-board-game#readme",
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  },
   "files": [
     "index.html",
     "game.js",

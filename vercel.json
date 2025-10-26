@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "name": "siege-board-game",
+  "buildCommand": "echo 'No build required'",
+  "outputDirectory": ".",
+  "rewrites": [
+    {
+      "source": "/game",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/rules",
+      "destination": "/《攻城掠地》桌游规则书.md"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    },
+    {
+      "source": "/game.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.css)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/css"
+        }
+      ]
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}

@@ -1,0 +1,375 @@
+# 《攻城掠地》桌游项目 - 生产环境Docker Compose配置
+version: '3.8'
+
+services:
+  # 主应用服务
+  app:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.production
+      args:
+        NODE_ENV: production
+    image: siege-game:latest
+    container_name: siege-game-app
+    restart: unless-stopped
+    
+    # 环境变量
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      - HOST=0.0.0.0
+      - LOG_LEVEL=info
+      - TZ=Asia/Shanghai
+    
+    # 端口映射 (仅内部访问)
+    expose:
+      - "8000"
+    
+    # 数据卷
+    volumes:
+      - app_logs:/app/logs
+      - app_uploads:/app/uploads
+      - app_temp:/app/temp
+      # 只读挂载配置文件
+      - ./config/production.env:/app/.env:ro
+    
+    # 网络
+    networks:
+      - app_network
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    # 安全设置
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /app/temp:noexec,nosuid,size=50m
+    
+    # 依赖服务
+    depends_on:
+      redis:
+        condition: service_healthy
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:1.24-alpine
+    container_name: siege-game-nginx
+    restart: unless-stopped
+    
+    # 端口映射
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    # 配置文件
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx_cache:/var/cache/nginx
+      - nginx_logs:/var/log/nginx
+      # 静态文件
+      - ../public:/var/www/html:ro
+    
+    # 网络
+    networks:
+      - app_network
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    
+    # 依赖服务
+    depends_on:
+      - app
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis缓存 (可选)
+  redis:
+    image: redis:7-alpine
+    container_name: siege-game-redis
+    restart: unless-stopped
+    
+    # 命令参数
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-defaultpassword}
+    
+    # 端口 (仅内部访问)
+    expose:
+      - "6379"
+    
+    # 数据卷
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    
+    # 网络
+    networks:
+      - app_network
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # 监控服务 (Prometheus + Grafana)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: siege-game-prometheus
+    restart: unless-stopped
+    
+    # 端口 (仅内部访问)
+    expose:
+      - "9090"
+    
+    # 配置文件
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    
+    # 网络
+    networks:
+      - monitoring_network
+      - app_network
+    
+    # 命令参数
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # Grafana仪表板
+  grafana:
+    image: grafana/grafana:latest
+    container_name: siege-game-grafana
+    restart: unless-stopped
+    
+    # 端口
+    ports:
+      - "3000:3000"
+    
+    # 环境变量
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    
+    # 数据卷
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    
+    # 网络
+    networks:
+      - monitoring_network
+    
+    # 依赖服务
+    depends_on:
+      - prometheus
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # 日志收集 (ELK Stack - Elasticsearch)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: siege-game-elasticsearch
+    restart: unless-stopped
+    
+    # 环境变量
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    
+    # 端口 (仅内部访问)
+    expose:
+      - "9200"
+    
+    # 数据卷
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    
+    # 网络
+    networks:
+      - logging_network
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Kibana仪表板
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    container_name: siege-game-kibana
+    restart: unless-stopped
+    
+    # 端口
+    ports:
+      - "5601:5601"
+    
+    # 环境变量
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    
+    # 网络
+    networks:
+      - logging_network
+    
+    # 依赖服务
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# 网络配置
+networks:
+  app_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+  
+  monitoring_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+  
+  logging_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.22.0.0/16
+
+# 数据卷配置
+volumes:
+  # 应用数据
+  app_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/log/siege-game
+  
+  app_uploads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/www/siege-game/uploads
+  
+  app_temp:
+    driver: local
+  
+  # Nginx数据
+  nginx_cache:
+    driver: local
+  
+  nginx_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/log/nginx
+  
+  # Redis数据
+  redis_data:
+    driver: local
+  
+  # 监控数据
+  prometheus_data:
+    driver: local
+  
+  grafana_data:
+    driver: local
+  
+  # 日志数据
+  elasticsearch_data:
+    driver: local

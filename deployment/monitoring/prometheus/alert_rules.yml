@@ -1,0 +1,251 @@
+# 《攻城掠地》桌游项目 - Prometheus告警规则
+
+groups:
+  # 应用服务告警
+  - name: siege-game-app
+    rules:
+      # 应用服务不可用
+      - alert: AppDown
+        expr: up{job="siege-game-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: siege-game
+        annotations:
+          summary: "《攻城掠地》应用服务不可用"
+          description: "应用服务已停止响应超过1分钟"
+
+      # 应用响应时间过长
+      - alert: HighResponseTime
+        expr: http_request_duration_seconds{quantile="0.95"} > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: siege-game
+        annotations:
+          summary: "应用响应时间过长"
+          description: "95%的请求响应时间超过2秒，当前值: {{ $value }}秒"
+
+      # 应用错误率过高
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+          service: siege-game
+        annotations:
+          summary: "应用错误率过高"
+          description: "5xx错误率超过5%，当前值: {{ $value | humanizePercentage }}"
+
+      # 内存使用率过高
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 400
+        for: 5m
+        labels:
+          severity: warning
+          service: siege-game
+        annotations:
+          summary: "应用内存使用率过高"
+          description: "内存使用超过400MB，当前值: {{ $value | humanize }}MB"
+
+  # 系统资源告警
+  - name: system-resources
+    rules:
+      # CPU使用率过高
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "CPU使用率过高"
+          description: "CPU使用率超过80%，当前值: {{ $value | humanizePercentage }}"
+
+      # 内存使用率过高
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "系统内存使用率过高"
+          description: "内存使用率超过85%，当前值: {{ $value | humanizePercentage }}"
+
+      # 磁盘空间不足
+      - alert: LowDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "磁盘空间不足"
+          description: "磁盘使用率超过85%，挂载点: {{ $labels.mountpoint }}，当前值: {{ $value | humanizePercentage }}"
+
+      # 磁盘空间严重不足
+      - alert: CriticalDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 95
+        for: 1m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "磁盘空间严重不足"
+          description: "磁盘使用率超过95%，挂载点: {{ $labels.mountpoint }}，当前值: {{ $value | humanizePercentage }}"
+
+  # Nginx告警
+  - name: nginx
+    rules:
+      # Nginx服务不可用
+      - alert: NginxDown
+        expr: up{job="nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: nginx
+        annotations:
+          summary: "Nginx服务不可用"
+          description: "Nginx服务已停止响应超过1分钟"
+
+      # Nginx连接数过高
+      - alert: HighNginxConnections
+        expr: nginx_connections_active > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: nginx
+        annotations:
+          summary: "Nginx活跃连接数过高"
+          description: "活跃连接数超过1000，当前值: {{ $value }}"
+
+      # Nginx错误率过高
+      - alert: HighNginxErrorRate
+        expr: rate(nginx_http_requests_total{status=~"4..|5.."}[5m]) / rate(nginx_http_requests_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          service: nginx
+        annotations:
+          summary: "Nginx错误率过高"
+          description: "4xx/5xx错误率超过10%，当前值: {{ $value | humanizePercentage }}"
+
+  # Redis告警
+  - name: redis
+    rules:
+      # Redis服务不可用
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis服务不可用"
+          description: "Redis服务已停止响应超过1分钟"
+
+      # Redis内存使用率过高
+      - alert: HighRedisMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis内存使用率过高"
+          description: "Redis内存使用率超过80%，当前值: {{ $value | humanizePercentage }}"
+
+      # Redis连接数过高
+      - alert: HighRedisConnections
+        expr: redis_connected_clients > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis连接数过高"
+          description: "Redis连接数超过100，当前值: {{ $value }}"
+
+  # Docker容器告警
+  - name: docker-containers
+    rules:
+      # 容器重启频繁
+      - alert: ContainerRestartingFrequently
+        expr: increase(container_start_time_seconds[1h]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "容器重启频繁"
+          description: "容器 {{ $labels.name }} 在1小时内重启超过5次"
+
+      # 容器CPU使用率过高
+      - alert: HighContainerCPU
+        expr: rate(container_cpu_usage_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "容器CPU使用率过高"
+          description: "容器 {{ $labels.name }} CPU使用率超过80%，当前值: {{ $value | humanizePercentage }}"
+
+      # 容器内存使用率过高
+      - alert: HighContainerMemory
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "容器内存使用率过高"
+          description: "容器 {{ $labels.name }} 内存使用率超过80%，当前值: {{ $value | humanizePercentage }}"
+
+  # 网站可用性告警
+  - name: website-availability
+    rules:
+      # 网站不可访问
+      - alert: WebsiteDown
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: website
+        annotations:
+          summary: "网站不可访问"
+          description: "网站 {{ $labels.instance }} 无法访问"
+
+      # 网站响应时间过长
+      - alert: SlowWebsiteResponse
+        expr: probe_duration_seconds > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: website
+        annotations:
+          summary: "网站响应时间过长"
+          description: "网站 {{ $labels.instance }} 响应时间超过5秒，当前值: {{ $value }}秒"
+
+      # SSL证书即将过期
+      - alert: SSLCertificateExpiringSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 7
+        for: 1h
+        labels:
+          severity: warning
+          service: ssl
+        annotations:
+          summary: "SSL证书即将过期"
+          description: "网站 {{ $labels.instance }} 的SSL证书将在7天内过期"
+
+      # SSL证书已过期
+      - alert: SSLCertificateExpired
+        expr: probe_ssl_earliest_cert_expiry - time() < 0
+        for: 1m
+        labels:
+          severity: critical
+          service: ssl
+        annotations:
+          summary: "SSL证书已过期"
+          description: "网站 {{ $labels.instance }} 的SSL证书已过期"
