@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>攻城掠地 - 桌游网页版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B0000',
+                        secondary: '#2E8B57',
+                        neutral: '#F5F5DC',
+                        shu: '#D32F2F',
+                        wu: '#1976D2'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            }
+            .card-hover {
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .card-hover:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+            }
+            .bg-texture {
+                background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            }
+            .text-shadow {
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            }
+            .perspective-1000 {
+                perspective: 1000px;
+            }
+            .rotate-y-180 {
+                transform: rotateY(180deg);
+            }
+            .transform-style-3d {
+                transform-style: preserve-3d;
+            }
+            .backface-hidden {
+                backface-visibility: hidden;
+            }
+            .absolute-full {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral bg-texture min-h-screen flex flex-col">
+    <!-- 头部导航 -->
+    <header class="bg-primary text-white py-4 px-6 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-shadow flex items-center">
+                <i class="fa fa-shield mr-3"></i>
+                攻城掠地
+            </h1>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="#" class="hover:text-yellow-300 transition-colors" id="btnRules">规则说明</a></li>
+                    <li><a href="#" class="hover:text-yellow-300 transition-colors" id="btnRestart">重新开始</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <!-- 游戏状态信息 -->
+        <div class="mb-8 bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-xl font-bold">游戏进度</h2>
+                    <p id="gameStatus" class="text-gray-600">选择阵营开始游戏</p>
+                </div>
+                <div class="flex space-x-8">
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">大比分</div>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-2xl font-bold text-shu" id="shuScore">0</span>
+                            <span class="text-xl">:</span>
+                            <span class="text-2xl font-bold text-wu" id="wuScore">0</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">当前局数</div>
+                        <div class="text-2xl font-bold" id="currentRound">1/3</div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between">
+                <div>
+                    <div class="text-sm text-gray-500">本局得分</div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xl font-bold text-shu" id="shuRoundScore">0</span>
+                        <span class="text-lg">:</span>
+                        <span class="text-xl font-bold text-wu" id="wuRoundScore">0</span>
+                    </div>
+                </div>
+                <div>
+                    <button id="btnNextStep" class="bg-primary hover:bg-red-800 text-white px-6 py-2 rounded-lg transition-colors hidden">
+                        下一步
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 阵营选择界面 -->
+        <div id="campSelectScreen" class="flex flex-col items-center justify-center min-h-[50vh]">
+            <h2 class="text-2xl font-bold mb-8">选择你的阵营</h2>
+            <div class="flex space-x-12">
+                <div class="text-center">
+                    <div class="perspective-1000 cursor-pointer mb-4" id="selectShu">
+                        <div class="relative w-48 h-72 transform-style-3d transition-transform duration-300 card-shadow">
+                            <div class="absolute-full bg-shu rounded-lg p-4 backface-hidden flex flex-col justify-between">
+                                <div class="text-center">
+                                    <i class="fa fa-dragon text-6xl text-white mb-4"></i>
+                                    <h3 class="text-white text-2xl font-bold">蜀国</h3>
+                                </div>
+                                <div class="text-center text-white">点击选择</div>
+                            </div>
+                            <div class="absolute-full bg-white rounded-lg p-4 backface-hidden rotate-y-180 flex flex-col justify-between">
+                                <div class="text-center">
+                                    <i class="fa fa-dragon text-6xl text-shu mb-4"></i>
+                                    <h3 class="text-shu text-2xl font-bold">蜀国卡牌</h3>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="h-10 bg-shu/10 rounded flex items-center justify-center"><i class="fa fa-user text-shu"></i></div>
+                                    <div class="h-10 bg-shu/10 rounded flex items-center justify-center"><i class="fa fa-arrow text-shu"></i></div>
+                                    <div class="h-10 bg-shu/10 rounded flex items-center justify-center"><i class="fa fa-horse text-shu"></i></div>
+                                    <div class="h-10 bg-shu/10 rounded flex items-center justify-center"><i class="fa fa-star text-shu"></i></div>
+                                    <div class="h-10 bg-shu/10 rounded flex items-center justify-center"><i class="fa fa-truck text-shu"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">刘备阵营</p>
+                </div>
+                <div class="text-center">
+                    <div class="perspective-1000 cursor-pointer mb-4" id="selectWu">
+                        <div class="relative w-48 h-72 transform-style-3d transition-transform duration-300 card-shadow">
+                            <div class="absolute-full bg-wu rounded-lg p-4 backface-hidden flex flex-col justify-between">
+                                <div class="text-center">
+                                    <i class="fa fa-ship text-6xl text-white mb-4"></i>
+                                    <h3 class="text-white text-2xl font-bold">吴国</h3>
+                                </div>
+                                <div class="text-center text-white">点击选择</div>
+                            </div>
+                            <div class="absolute-full rounded-lg backface-hidden rotate-y-180 overflow-hidden">
+                                <!-- 吴国卡牌背面设计 -->
+                                <div class="w-full h-full bg-blue-500 flex flex-col items-center justify-center relative overflow-hidden">
+                                    <!-- 亭子装饰 -->
+                                    <div class="absolute top-8 left-0 right-0 h-20 opacity-40 flex justify-center">
+                                        <div class="w-32 h-16">
+                                            <div class="w-full h-3 bg-blue-200 rounded-t"></div>
+                                            <div class="flex justify-between px-4">
+                                                <div class="w-3 h-14 bg-blue-300"></div>
+                                                <div class="w-3 h-14 bg-blue-300"></div>
+                                                <div class="w-3 h-14 bg-blue-300"></div>
+                                                <div class="w-3 h-14 bg-blue-300"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 中心吴字 -->
+                                    <div class="text-7xl font-bold text-yellow-300">吴</div>
+                                    
+                                    <!-- 底部装饰 -->
+                                    <div class="absolute bottom-10 w-32 h-8 flex justify-center">
+                                        <div class="w-24 h-3 bg-blue-300 rounded-full"></div>
+                                        <div class="absolute bottom-0 w-16 h-4 bg-yellow-200/60 rounded-full"></div>
+                                    </div>
+                                    
+                                    <!-- 荷花装饰 -->
+                                    <div class="absolute bottom-5 left-4 w-10 h-8 opacity-80">
+                                        <div class="w-full h-5 bg-pink-400 rounded-t-full"></div>
+                                        <div class="w-1 h-6 bg-green-500 mx-auto"></div>
+                                    </div>
+                                    <div class="absolute bottom-5 right-4 w-10 h-8 opacity-80">
+                                        <div class="w-full h-5 bg-pink-400 rounded-t-full"></div>
+                                        <div class="w-1 h-6 bg-green-500 mx-auto"></div>
+                                    </div>
+                                    
+                                    <!-- 边缘装饰 -->
+                                    <div class="absolute inset-0 border-4 border-blue-400/30 rounded-lg"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">孙权阵营</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 手牌选择界面 -->
+        <div id="handSelectScreen" class="hidden">
+            <div class="mb-4">
+                <h2 class="text-xl font-bold">选择手牌 (5-10张)</h2>
+                <p class="text-gray-600">请从你的牌堆中选择5-10张牌作为本局的手牌</p>
+            </div>
+            <div class="grid grid-cols-5 gap-4 mb-6" id="playerDeck">
+                <!-- 玩家牌堆将动态生成 -->
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                <h3 class="font-bold mb-2">已选手牌 (<span id="selectedCount">0</span>/10)</h3>
+                <div class="grid grid-cols-5 gap-4" id="selectedCards">
+                    <!-- 已选手牌将动态生成 -->
+                </div>
+            </div>
+            <button id="confirmHandBtn" class="bg-primary hover:bg-red-800 text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                确认手牌
+            </button>
+        </div>
+
+        <!-- 游戏主界面 -->
+        <div id="gameScreen" class="hidden">
+            <!-- 对手区域 -->
+            <div class="mb-8 bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold" id="opponentName">对手</h3>
+                    <div class="flex items-center">
+                        <span class="mr-2">手牌数量:</span>
+                        <span id="opponentHandCount">0</span>
+                    </div>
+                </div>
+                <div class="flex justify-center" id="opponentBattleCards">
+                    <!-- 对手战斗卡牌将动态生成 -->
+                </div>
+                <div class="mt-4 text-center" id="opponentBattlePower">
+                    <!-- 对手战斗力将动态显示 -->
+                </div>
+            </div>
+
+            <!-- 战斗信息区域 -->
+            <div class="mb-8 bg-white rounded-lg shadow-md p-6 text-center">
+                <h3 class="text-xl font-bold mb-2" id="battleRoundInfo">第1场战斗</h3>
+                <p id="battleStatus" class="text-gray-600">准备战斗</p>
+                <div id="duelResult" class="mt-4 hidden">
+                    <!-- 决斗结果将动态显示 -->
+                </div>
+                <div id="attackDefendChoice" class="mt-4 hidden">
+                    <!-- 攻守选择界面 -->
+                    <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <p class="font-bold mb-4">你赢得了决斗！请选择你的角色：</p>
+                        <div class="flex justify-center space-x-4">
+                            <button id="chooseAttacker" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors">
+                                选择攻方
+                            </button>
+                            <button id="chooseDefender" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                                选择守方
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="battleResult" class="mt-4 hidden">
+                    <!-- 战斗结果将动态显示 -->
+                </div>
+            </div>
+
+            <!-- 玩家区域 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold" id="playerName">玩家</h3>
+                    <div class="flex items-center">
+                        <span class="mr-2">手牌数量:</span>
+                        <span id="playerHandCount">0</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-5 gap-4 mb-6" id="playerHand">
+                    <!-- 玩家手牌将动态生成 -->
+                </div>
+                <div class="flex justify-center mt-4">
+                    <button id="confirmBattleBtn" class="bg-primary hover:bg-red-800 text-white px-6 py-2 rounded-lg transition-colors hidden">
+                        确认出战
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏结束界面 -->
+        <div id="gameOverScreen" class="hidden flex flex-col items-center justify-center min-h-[50vh]">
+            <h2 class="text-3xl font-bold mb-4" id="winnerText">游戏结束</h2>
+            <p class="text-xl mb-8" id="finalScoreText">最终比分</p>
+            <button id="playAgainBtn" class="bg-primary hover:bg-red-800 text-white px-8 py-3 rounded-lg text-xl transition-colors">
+                再来一局
+            </button>
+        </div>
+    </main>
+
+    <!-- 规则说明模态框 -->
+    <div id="rulesModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">游戏规则说明</h2>
+                    <button id="closeRulesBtn" class="bg-white hover:bg-gray-100 text-black rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+                        <i class="fa fa-times text-lg font-bold"></i>
+                    </button>
+                </div>
+                <div class="prose max-w-none">
+                    <h3 class="text-xl font-bold">游戏简介</h3>
+                    <p>《攻城掠地》是一款基于三国历史背景的、全年龄段的、供2人游玩的对战类桌游。游戏主要分为"备战"和"作战"2个阶段。</p>
+                    
+                    <h3 class="text-xl font-bold mt-4">备战</h3>
+                    <h4 class="font-bold">阵营选择</h4>
+                    <p>本桌游分为【蜀国】和【吴国】两大阵营，双方阵营以牌背的不同图案做区分，两个阵营的牌完全一样，没有除牌背图案外的任何区别。游戏开始前，玩家根据喜好选择自己的阵营，并拿走该阵营对应的所有牌。</p>
+                    
+                    <h4 class="font-bold">牌面说明</h4>
+                    <p>每个阵营分别有25张牌作为"牌堆"，每一张牌代表着该阵营所持有的兵种，其中包含5张【步兵】、5张【弓兵】、5张【骑兵】、5张【武将】、5张【战车】。牌的左上角的数字代表的是这一兵种的【战斗力】，数字越大代表这张牌的战斗力越高。</p>
+                    
+                    <h3 class="text-xl font-bold mt-4">作战</h3>
+                    <h4 class="font-bold">取牌</h4>
+                    <p>每盘游戏的作战分为3局，每一局获胜则得到1分，最先获得2个分的玩家取得游戏的胜利，若双方分数相同则为此盘游戏平局。在开始每局比赛之前，双方需从自己的25张牌的总牌堆中，在查看了牌面的情况下，没有任何限制的抽调5至10张牌，作为【手牌】参与这局的比赛。</p>
+                    
+                    <h4 class="font-bold">决斗</h4>
+                    <p>每局的对战又分为3场战斗，这3场战斗中，前2场战斗获胜能为玩家获得1点，最后一场战斗获胜能为玩家获得2点。在开始第一场战斗前，双方需要自由选出自己【手牌】中的任意一张牌与对方【决斗】，也就是比拼战斗力数字的大小。决斗获胜方能够决定自己在第一场战斗是【攻方】还是【守方】。</p>
+                    
+                    <h4 class="font-bold">对战</h4>
+                    <p>决斗方胜者在决定第一轮战斗谁作为【守方】之后，【守方】优先出1张至5张的任意数量张牌作为第一轮战斗派遣的兵力，并且牌面朝下。【攻方】必须出与【守方】数量相同的牌，双方出牌完毕之后，展开双方的牌面并且按阵营进行战斗力加总，比较各自战斗力之和的大小，战斗力之和大的一方获得本次战斗的胜利。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="game.js"></script>
+</body>
+</html>

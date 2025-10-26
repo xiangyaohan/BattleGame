@@ -1,0 +1,445 @@
+/* Siege Game Admin Styles */
+
+/* Dashboard Layout */
+.siege-admin-dashboard {
+    margin-top: 20px;
+}
+
+/* Statistics Grid */
+.siege-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.siege-stat-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.siege-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.siege-stat-icon {
+    font-size: 2.5em;
+    margin-right: 15px;
+    opacity: 0.8;
+}
+
+.siege-stat-content h3 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: bold;
+    color: #2271b1;
+}
+
+.siege-stat-content p {
+    margin: 5px 0 0 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* Quick Actions */
+.siege-quick-actions {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.siege-quick-actions h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.siege-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.siege-action-buttons .button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+.siege-action-buttons .dashicons {
+    font-size: 16px;
+}
+
+/* Recent Games */
+.siege-recent-games {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.siege-recent-games h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.siege-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.siege-status-playing {
+    background: #e7f3ff;
+    color: #0073aa;
+}
+
+.siege-status-completed {
+    background: #e6f7e6;
+    color: #00a32a;
+}
+
+.siege-status-saved {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* System Info */
+.siege-system-info {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.siege-system-info h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.siege-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.siege-info-item {
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border-left: 4px solid #2271b1;
+}
+
+.siege-info-item strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.siege-info-item span {
+    color: #666;
+    font-family: monospace;
+}
+
+/* Settings Page */
+.siege-settings-container {
+    max-width: 1000px;
+}
+
+.siege-settings-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.siege-settings-section h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    color: #2271b1;
+}
+
+.siege-settings-section .form-table th {
+    width: 200px;
+    font-weight: 600;
+}
+
+.siege-settings-section .form-table td {
+    padding-left: 20px;
+}
+
+.siege-shortcode-info {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.siege-shortcode-info h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #495057;
+    font-size: 1.1em;
+}
+
+.siege-shortcode-info h3:first-child {
+    margin-top: 0;
+}
+
+.siege-shortcode-info code {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px 15px;
+    display: block;
+    margin: 8px 0;
+    font-family: 'Courier New', Consolas, Monaco, monospace;
+    font-size: 0.9em;
+    color: #e83e8c;
+    overflow-x: auto;
+}
+
+.siege-shortcode-info ul {
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+.siege-shortcode-info li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.siege-shortcode-info li strong {
+    color: #2271b1;
+    font-family: monospace;
+}
+
+/* Records Page */
+.siege-records-filters {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.siege-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: end;
+    margin-bottom: 15px;
+}
+
+.siege-filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+
+.siege-filter-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.siege-filter-group select,
+.siege-filter-group input {
+    padding: 6px 10px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+
+/* Statistics Page */
+.siege-stats-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.siege-chart-container {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 300px;
+}
+
+.siege-chart-container h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #2271b1;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .siege-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .siege-stats-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .siege-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .siege-action-buttons {
+        flex-direction: column;
+    }
+    
+    .siege-action-buttons .button {
+        justify-content: center;
+    }
+    
+    .siege-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .siege-filter-group {
+        min-width: auto;
+    }
+    
+    .siege-info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Loading States */
+.siege-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #666;
+}
+
+.siege-loading::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-top: 2px solid #2271b1;
+    border-radius: 50%;
+    animation: siege-spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes siege-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error States */
+.siege-error {
+    background: #ffeaea;
+    border: 1px solid #ff6b6b;
+    border-radius: 4px;
+    padding: 15px;
+    color: #d63031;
+    margin: 10px 0;
+}
+
+.siege-success {
+    background: #eafaf1;
+    border: 1px solid #00b894;
+    border-radius: 4px;
+    padding: 15px;
+    color: #00a085;
+    margin: 10px 0;
+}
+
+/* Tooltips */
+.siege-tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.siege-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.siege-tooltip:hover::after {
+    opacity: 1;
+}
+
+/* Custom Buttons */
+.siege-btn-danger {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+.siege-btn-danger:hover {
+    background: #c82333;
+    border-color: #bd2130;
+    color: #fff;
+}
+
+.siege-btn-warning {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.siege-btn-warning:hover {
+    background: #e0a800;
+    border-color: #d39e00;
+    color: #212529;
+}
+
+.siege-btn-info {
+    background: #17a2b8;
+    border-color: #17a2b8;
+    color: #fff;
+}
+
+.siege-btn-info:hover {
+    background: #138496;
+    border-color: #117a8b;
+    color: #fff;
