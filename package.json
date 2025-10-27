@@ -1,0 +1,45 @@
+{
+  "name": "siege-board-game",
+  "version": "1.0.0",
+  "description": "《攻城掠地》桌游 - 一个基于Web的策略卡牌游戏",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step required for static files'",
+    "test": "echo 'No tests specified'",
+    "deploy": "npm run build && npm start"
+  },
+  "keywords": [
+    "board-game",
+    "card-game",
+    "strategy",
+    "web-game",
+    "javascript",
+    "html5"
+  ],
+  "author": "Trae AI Assistant",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/siege-board-game.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/siege-board-game/issues"
+  },
+  "homepage": "https://github.com/your-username/siege-board-game#readme",
+  "dependencies": {},
+  "devDependencies": {},
+  "files": [
+    "index.html",
+    "game.js",
+    "card_image/**/*",
+    "*.pdf",
+    "*.md",
+    "vercel.json"
+  ]
+}
